@@ -43,16 +43,22 @@ export default function App() {
     }
 
     nowBoard[rowNum][columnNum][0] = true; // isOpen = true
-    // const arroundCoordinates = getArroundCoodinates(rowNum, columnNum);
+    setBoard(nowBoard);
+
+    const arroundCoordinates = getArroundCoodinates(rowNum, columnNum);
     // console.log(arroundCoordinates);
 
-    // if (bombNum === 0) {
-    //   arroundCoordinates.forEach(([row, column]) => {
-    //     onClickSquare(row, column);
-    //   });
-    // }
-
-    setBoard(nowBoard);
+    // 再帰的に空白のマスの周囲を開けていく
+    if (nowBoard[rowNum][columnNum][1] === 0) {
+      // bombNum === 0 の時
+      arroundCoordinates.forEach(([row, column]) => {
+        console.log(row, column);
+        if (board[row][column][0] === false) {
+          // すでに開けたマスでは実行しないようにする
+          onClickSquare(row, column);
+        }
+      });
+    }
   };
 
   // 初めにマスを開けたとき、爆弾をランダムに配置する動作
@@ -100,9 +106,6 @@ export default function App() {
         // 盤上に収まる周辺のマスの座標を格納
         const arroundCoordinates: Array<[number, number]> =
           getArroundCoodinates(i, j);
-        console.log(i, j);
-
-        console.log(arroundCoordinates);
 
         // 周辺マスの各座標をチェックして爆弾の個数を数える
         let arroundBombNum: number = 0;
@@ -131,7 +134,8 @@ export default function App() {
           rowNum + rowDirection >= 0 &&
           rowNum + rowDirection <= 8 &&
           columnNum + columnDirection >= 0 &&
-          columnNum + columnDirection <= 8
+          columnNum + columnDirection <= 8 && // 領域内かどうか
+          (rowDirection !== 0 || columnDirection !== 0) // 自マスでないかどうか
         ) {
           arroundCoordinates.push([
             rowNum + rowDirection,
