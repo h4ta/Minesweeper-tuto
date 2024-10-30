@@ -3,6 +3,7 @@ import "./styles.css";
 import { Square } from "./component/Square";
 import { squareInfoType } from "./type/type";
 import { shuffleArray } from "./helper/shuffleArray";
+import { Guide } from "./component/Guide";
 
 export default function App() {
   const rowSquareNum: number = 9;
@@ -30,29 +31,62 @@ export default function App() {
   // 本ゲームの盤面
   const [board, setBoard] = useState<Array<Array<squareInfoType>>>(zeroArr2Dim);
 
-  // まだ1マスも開けてないかどうか管理する変数
-  const [isFirstOpen, setIsFirstOpen] = useState<boolean>(true);
+  // ゲームクリア、ゲームオーバーを管理する変数
+  const [isGameClear, setIsGameClear] = useState<boolean>(false);
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
+
+  // ゲーム中かどうか管理する変数
+  const [isGameNow, setIsGameNow] = useState<boolean>(false);
 
   // マス目をクリックして開けた時の動作
   const onClickSquare = (rowNum: number, columnNum: number) => {
+    // ゲームオーバーした際はマスを開けられないようにする
+    if (isGameOver) {
+      return;
+    }
+
     let nowBoard: Array<Array<squareInfoType>> = [...board];
 
-    if (isFirstOpen) {
+    // 既に開かれたマスがクリックされた場合、何もしない
+    if (nowBoard[rowNum][columnNum][0]) {
+      return;
+    }
+
+    if (!isGameNow) {
       nowBoard = [...placeBomb(rowNum, columnNum)];
-      setIsFirstOpen(false);
+      // ゲーム開始
+      setIsGameNow(true);
     }
 
     nowBoard[rowNum][columnNum][0] = true; // isOpen = true
+
     setBoard(nowBoard);
 
-    const arroundCoordinates = getArroundCoodinates(rowNum, columnNum);
-    // console.log(arroundCoordinates);
+    // ゲームオーバー
+    if (nowBoard[rowNum][columnNum][1] === -1) {
+      setIsGameOver(true);
+      return;
+    }
+
+    // ゲームクリア
+    // 現在空いているマス数を数える
+    let openedSquaresNum: number = 0;
+    nowBoard.forEach((rows) => {
+      rows.forEach(([isOpen, bombNum]) => {
+        if (isOpen) {
+          openedSquaresNum++;
+        }
+      });
+    });
+    if (openedSquaresNum === totalSquaresNum - totalBombNum) {
+      setIsGameClear(true);
+    }
 
     // 再帰的に空白のマスの周囲を開けていく
+    const arroundCoordinates = getArroundCoodinates(rowNum, columnNum);
     if (nowBoard[rowNum][columnNum][1] === 0) {
       // bombNum === 0 の時
       arroundCoordinates.forEach(([row, column]) => {
-        console.log(row, column);
         if (board[row][column][0] === false) {
           // すでに開けたマスでは実行しないようにする
           onClickSquare(row, column);
@@ -148,6 +182,13 @@ export default function App() {
     return arroundCoordinates;
   };
 
+  const restart = () => {
+    setBoard(zeroArr2Dim);
+    setIsGameClear(false);
+    setIsGameOver(false);
+    setIsGameNow(false);
+  };
+
   return (
     <>
       {boardRowNums.map((row) => {
@@ -166,6 +207,12 @@ export default function App() {
           </div>
         );
       })}
+      <Guide
+        isGameClear={isGameClear}
+        isGameOver={isGameOver}
+        isGameNow={isGameNow}
+        restart={restart}
+      ></Guide>
     </>
   );
 }

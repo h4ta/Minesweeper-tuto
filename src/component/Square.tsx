@@ -50,6 +50,10 @@ export const Square = (props: Props) => {
         );
     }
   } else {
-    return <button className="closedSquare" onClick={onClick}></button>;
+    return (
+      <button className="closedSquare" onClick={onClick}>
+        {bombNum}
+      </button>
+    );
   }
 };
