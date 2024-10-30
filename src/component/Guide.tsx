@@ -62,7 +62,9 @@ export const Guide = (props: Props) => {
         <>
           <div>
             <div>
-              time {Math.floor(playingTime / 60)}:{playingTime % 60}
+              time {("0" + Math.floor(playingTime / 60).toString()).slice(-2)}:
+              {("0" + (playingTime % 60).toString()).slice(-2)}
+              {/*分:秒を取得し0埋めする */}
             </div>
             <div>🚩: {leftFlagNum}</div>
           </div>
@@ -85,7 +87,9 @@ export const Guide = (props: Props) => {
         <>
           <div>Game Clear!!</div>
           <div>
-            Your clear time {Math.floor(playingTime / 60)}:{playingTime % 60}
+            Your clear time{" "}
+            {("0" + Math.floor(playingTime / 60).toString()).slice(-2)}:
+            {("0" + (playingTime % 60).toString()).slice(-2)}
           </div>
         </>
       )}
