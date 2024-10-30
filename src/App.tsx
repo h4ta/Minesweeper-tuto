@@ -80,7 +80,13 @@ export default function App() {
     if (openedSquaresNum === 0) {
       // ゲーム開始
       setIsGameNow(true);
-      nowBoard = [...placeBomb(rowNum, columnNum)];
+      // 初めに開いたマスが爆弾だけでなく、空白でないマスになった時も配置しなおす
+      while (true) {
+        nowBoard = [...placeBomb()];
+        if (nowBoard[rowNum][columnNum][1] === 0) {
+          break;
+        }
+      }
     }
 
     nowBoard[rowNum][columnNum][0] = true; // isOpen = true
@@ -119,10 +125,7 @@ export default function App() {
   };
 
   // 初めにマスを開けたとき、爆弾をランダムに配置する動作
-  const placeBomb = (
-    rowNum: number,
-    columnNum: number
-  ): Array<Array<squareInfoType>> => {
+  const placeBomb = (): Array<Array<squareInfoType>> => {
     // [爆弾、爆弾、..., 爆弾、空白、空白、...、空白] となっている配列をシャッフルし、2次元配列に戻すことで爆弾をランダムに配置することにする
     let board1Dim: Array<squareInfoType> = new Array(totalSquaresNum);
     for (let i = 0; i < totalSquaresNum; i++) {
@@ -133,14 +136,7 @@ export default function App() {
       }
     }
 
-    let placedBombBoard1Dim: Array<squareInfoType>;
-    while (true) {
-      // 初めに開けたマスに爆弾が配置されたらやり直す
-      placedBombBoard1Dim = shuffleArray(board1Dim);
-      if (placedBombBoard1Dim[rowSquareNum * rowNum + columnNum][1] !== -1) {
-        break;
-      }
-    }
+    let placedBombBoard1Dim: Array<squareInfoType> = shuffleArray(board1Dim);
 
     // 二次元配列に戻す
     const placedBombBoard: Array<Array<squareInfoType>> = new Array(
