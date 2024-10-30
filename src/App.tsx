@@ -39,23 +39,46 @@ export default function App() {
   const [isGameNow, setIsGameNow] = useState<boolean>(false);
 
   // マス目をクリックして開けた時の動作
-  const onClickSquare = (rowNum: number, columnNum: number) => {
+  const onClickSquare = (
+    rowNum: number,
+    columnNum: number,
+    receivedBoard?: Array<Array<squareInfoType>>
+  ) => {
     // ゲームオーバーした際はマスを開けられないようにする
     if (isGameOver) {
       return;
     }
 
-    let nowBoard: Array<Array<squareInfoType>> = [...board];
+    let nowBoard: Array<Array<squareInfoType>>;
+    if (receivedBoard) {
+      nowBoard = [...receivedBoard];
+    } else {
+      nowBoard = [...board];
+    }
 
     // 既に開かれたマスがクリックされた場合、何もしない
     if (nowBoard[rowNum][columnNum][0]) {
       return;
     }
 
-    if (!isGameNow) {
-      nowBoard = [...placeBomb(rowNum, columnNum)];
+    // クリックの直前に空いていたマス数を数える
+    let openedSquaresNum: number = 0;
+    nowBoard.forEach((rows) => {
+      rows.forEach(([isOpen, bombNum]) => {
+        if (isOpen) {
+          openedSquaresNum++;
+        }
+      });
+    });
+
+    if (openedSquaresNum === 0) {
       // ゲーム開始
+      console.log("はじめ");
+
       setIsGameNow(true);
+      console.log(isGameNow);
+
+      nowBoard = [...placeBomb(rowNum, columnNum)];
     }
 
     nowBoard[rowNum][columnNum][0] = true; // isOpen = true
@@ -68,17 +91,9 @@ export default function App() {
       return;
     }
 
-    // ゲームクリア
-    // 現在空いているマス数を数える
-    let openedSquaresNum: number = 0;
-    nowBoard.forEach((rows) => {
-      rows.forEach(([isOpen, bombNum]) => {
-        if (isOpen) {
-          openedSquaresNum++;
-        }
-      });
-    });
-    if (openedSquaresNum === totalSquaresNum - totalBombNum) {
+    // ゲームクリア;
+    if (openedSquaresNum + 1 === totalSquaresNum - totalBombNum) {
+      // 今開けた分の1マスをopenedSquareNumに加える
       setIsGameClear(true);
     }
 
@@ -89,7 +104,7 @@ export default function App() {
       arroundCoordinates.forEach(([row, column]) => {
         if (board[row][column][0] === false) {
           // すでに開けたマスでは実行しないようにする
-          onClickSquare(row, column);
+          onClickSquare(row, column, nowBoard); // boardのstateが変更される前に再帰関数が実行されてしまうので、その時のboardを渡すようにする
         }
       });
     }
@@ -162,6 +177,7 @@ export default function App() {
   ): Array<[number, number]> => {
     const arroundDirection: Array<number> = [-1, 0, 1];
     const arroundCoordinates: Array<[number, number]> = new Array(0);
+    let nowBoard: Array<Array<squareInfoType>> = [...board];
     arroundDirection.forEach((rowDirection) => {
       arroundDirection.forEach((columnDirection) => {
         if (
@@ -169,7 +185,9 @@ export default function App() {
           rowNum + rowDirection <= 8 &&
           columnNum + columnDirection >= 0 &&
           columnNum + columnDirection <= 8 && // 領域内かどうか
-          (rowDirection !== 0 || columnDirection !== 0) // 自マスでないかどうか
+          (rowDirection !== 0 || columnDirection !== 0) && // 自マスでないかどうか
+          nowBoard[rowNum + rowDirection][columnNum + columnDirection][0] ===
+            false
         ) {
           arroundCoordinates.push([
             rowNum + rowDirection,

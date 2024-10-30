@@ -8,11 +8,8 @@ type Props = {
 export const Guide = (props: Props) => {
   const { isGameClear, isGameOver, isGameNow, restart } = props;
 
-  // const restart = () => {};
-
   return (
     <>
-      <div>guide here</div>
       {isGameNow ? (
         <>
           <div>playing now</div> <button onClick={restart}>restart</button>
