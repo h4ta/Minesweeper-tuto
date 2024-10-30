@@ -258,7 +258,6 @@ export default function App() {
         isFlaggingNow={isFlaggingNow}
         setIsFlaggingNow={setIsFlaggingNow}
         leftFlagNum={leftFlagNum}
-        setLeftFlagNum={setLeftFlagNum}
       ></Guide>
     </>
   );

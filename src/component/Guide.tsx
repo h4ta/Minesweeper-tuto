@@ -8,7 +8,6 @@ type Props = {
   isFlaggingNow: boolean;
   setIsFlaggingNow: Dispatch<SetStateAction<boolean>>;
   leftFlagNum: number;
-  setLeftFlagNum: Dispatch<SetStateAction<number>>;
 };
 
 export const Guide = (props: Props) => {
@@ -20,7 +19,6 @@ export const Guide = (props: Props) => {
     isFlaggingNow,
     setIsFlaggingNow,
     leftFlagNum,
-    setLeftFlagNum,
   } = props;
 
   // クリア時間を計測する
@@ -52,13 +50,19 @@ export const Guide = (props: Props) => {
     }
   }, [isGameNow]);
 
+  useEffect(() => {
+    if (isGameClear || isGameOver) {
+      stopTimer();
+    }
+  }, [isGameClear, isGameOver]);
+
   return (
     <>
       {isGameNow ? (
         <>
           <div>
             <div>
-              time {Math.floor(playingTime / 60)} : {playingTime % 60}
+              time {Math.floor(playingTime / 60)}:{playingTime % 60}
             </div>
             <div>🚩: {leftFlagNum}</div>
           </div>
@@ -81,7 +85,7 @@ export const Guide = (props: Props) => {
         <>
           <div>Game Clear!!</div>
           <div>
-            Your clear time {Math.floor(playingTime / 60)} : {playingTime % 60}
+            Your clear time {Math.floor(playingTime / 60)}:{playingTime % 60}
           </div>
         </>
       )}
