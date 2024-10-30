@@ -49,8 +49,8 @@ export default function App() {
     columnNum: number,
     receivedBoard?: Array<Array<squareInfoType>>
   ) => {
-    // ゲームオーバーした際はマスを開けられないようにする
-    if (isGameOver) {
+    // ゲームオーバー、またクリアした際はマスを開けられないようにする
+    if (isGameOver || isGameClear) {
       return;
     }
 
@@ -206,7 +206,7 @@ export default function App() {
 
   // マスにフラグを設置、すでに置かれているときは解除
   const placeFlag = (rowNum: number, columnNum: number) => {
-    if (leftFlagNum <= 0) {
+    if (leftFlagNum <= 0 || isGameClear || isGameOver) {
       return;
     }
     let nowBoard: Array<Array<squareInfoType>> = [...board];
