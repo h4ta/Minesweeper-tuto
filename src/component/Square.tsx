@@ -54,7 +54,7 @@ export const Square = (props: Props) => {
     } else {
       return (
         <button className="closedSquare" onClick={onClick}>
-          {bombNum}
+          {/* {bombNum} このコメントアウトを外すと開いていないマス目でも爆弾の配置などを確認できる。デバック用*/}
         </button>
       );
     }
