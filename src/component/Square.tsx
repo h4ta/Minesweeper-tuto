@@ -7,13 +7,8 @@ type Props = {
 
 export const Square = (props: Props) => {
   const { squareInfo, onClick } = props;
-  const [isOpen, bombNum] = squareInfo;
+  const [isOpen, bombNum, isFlagged] = squareInfo;
 
-  //   return (
-  //     <button className="square" onClick={onClick}>
-  //       {value}
-  //     </button>
-  //   );
   if (isOpen) {
     switch (bombNum) {
       case 0:
@@ -50,10 +45,18 @@ export const Square = (props: Props) => {
         );
     }
   } else {
-    return (
-      <button className="closedSquare" onClick={onClick}>
-        {bombNum}
-      </button>
-    );
+    if (isFlagged) {
+      return (
+        <button className="closedSquare" onClick={onClick}>
+          🚩
+        </button>
+      );
+    } else {
+      return (
+        <button className="closedSquare" onClick={onClick}>
+          {bombNum}
+        </button>
+      );
+    }
   }
 };

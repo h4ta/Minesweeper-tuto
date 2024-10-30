@@ -17,14 +17,14 @@ export default function App() {
   // 配置される爆弾の個数
   const totalBombNum: number = 10;
 
-  // タプル[false, 0]で初期化した9×9配列を作成
+  // タプル[false, 0, false]で初期化した9×9配列を作成
   let zeroArr2Dim: Array<Array<squareInfoType>> = new Array(rowSquareNum);
   for (let i = 0; i < rowSquareNum; i++) {
     zeroArr2Dim[i] = new Array(columnSquareNum);
     for (let j = 0; j < columnSquareNum; j++) {
-      // 各マスに isOpen: 開いたか、bombNum: 付近の爆弾の個数 の二つの情報を持たせる
+      // 各マスに isOpen: 開いたか、bombNum: 付近の爆弾の個数、isFlagged: チェックされているか の三つの情報を持たせる
       // そのマスが爆弾であるとき、bombNumを-1とする
-      zeroArr2Dim[i][j] = [false, 0];
+      zeroArr2Dim[i][j] = [false, 0, false];
     }
   }
 
@@ -38,6 +38,11 @@ export default function App() {
   // ゲーム中かどうか管理する変数
   const [isGameNow, setIsGameNow] = useState<boolean>(false);
 
+  // クリックする際、マスを開く状態か、フラグを置く状態か管理する変数
+  const [isFlaggingNow, setIsFlaggingNow] = useState<boolean>(false);
+  // フラグ設置可能数を管理する変数
+  const [leftFlagNum, setLeftFlagNum] = useState<number>(totalBombNum);
+
   // マス目をクリックして開けた時の動作
   const onClickSquare = (
     rowNum: number,
@@ -49,6 +54,7 @@ export default function App() {
       return;
     }
 
+    // 現在の盤面の状態。再帰で呼び出された際は、引数のboardを取得する
     let nowBoard: Array<Array<squareInfoType>>;
     if (receivedBoard) {
       nowBoard = [...receivedBoard];
@@ -73,17 +79,19 @@ export default function App() {
 
     if (openedSquaresNum === 0) {
       // ゲーム開始
-      console.log("はじめ");
-
       setIsGameNow(true);
-      console.log(isGameNow);
-
       nowBoard = [...placeBomb(rowNum, columnNum)];
     }
 
     nowBoard[rowNum][columnNum][0] = true; // isOpen = true
 
     setBoard(nowBoard);
+
+    // フラグが開かれた際、フラグ設置可能数を戻す
+    if (nowBoard[rowNum][columnNum][2]) {
+      // isFlagged === true
+      setLeftFlagNum((n) => n + 1);
+    }
 
     // ゲームオーバー
     if (nowBoard[rowNum][columnNum][1] === -1) {
@@ -119,9 +127,9 @@ export default function App() {
     let board1Dim: Array<squareInfoType> = new Array(totalSquaresNum);
     for (let i = 0; i < totalSquaresNum; i++) {
       if (i < totalBombNum) {
-        board1Dim[i] = [false, -1];
+        board1Dim[i] = [false, -1, false];
       } else {
-        board1Dim[i] = [false, 0];
+        board1Dim[i] = [false, 0, false];
       }
     }
 
@@ -200,11 +208,24 @@ export default function App() {
     return arroundCoordinates;
   };
 
+  // マスにフラグを設置、すでに置かれているときは解除
+  const placeFlag = (rowNum: number, columnNum: number) => {
+    if (leftFlagNum <= 0) {
+      return;
+    }
+    let nowBoard: Array<Array<squareInfoType>> = [...board];
+    nowBoard[rowNum][columnNum][2] = !nowBoard[rowNum][columnNum][2]; // そのマスのisFlaggedをトグル
+    setBoard(nowBoard);
+    setLeftFlagNum((n) => n - 1);
+  };
+
   const restart = () => {
     setBoard(zeroArr2Dim);
     setIsGameClear(false);
     setIsGameOver(false);
     setIsGameNow(false);
+    setIsFlaggingNow(false);
+    setLeftFlagNum(totalBombNum);
   };
 
   return (
@@ -217,7 +238,11 @@ export default function App() {
                 <Square
                   squareInfo={board[row][column]}
                   onClick={() => {
-                    onClickSquare(row, column);
+                    if (isFlaggingNow) {
+                      placeFlag(row, column);
+                    } else {
+                      onClickSquare(row, column);
+                    }
                   }}
                 />
               );
@@ -230,6 +255,10 @@ export default function App() {
         isGameOver={isGameOver}
         isGameNow={isGameNow}
         restart={restart}
+        isFlaggingNow={isFlaggingNow}
+        setIsFlaggingNow={setIsFlaggingNow}
+        leftFlagNum={leftFlagNum}
+        setLeftFlagNum={setLeftFlagNum}
       ></Guide>
     </>
   );

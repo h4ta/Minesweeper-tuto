@@ -1,1 +1,1 @@
-export type squareInfoType = [boolean, number];
+export type squareInfoType = [boolean, number, boolean];
