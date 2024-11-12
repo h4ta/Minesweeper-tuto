@@ -7,7 +7,7 @@ type Props = {
 
 export const Square = (props: Props) => {
   const { squareInfo, onClick } = props;
-  const [isOpen, bombNum, isFlagged] = squareInfo;
+  const { isOpen, bombNum, isFlagged } = squareInfo;
 
   if (isOpen) {
     switch (bombNum) {
@@ -54,7 +54,8 @@ export const Square = (props: Props) => {
     } else {
       return (
         <button className="closedSquare" onClick={onClick}>
-          {/* {bombNum} このコメントアウトを外すと開いていないマス目でも爆弾の配置などを確認できる。デバック用*/}
+          {bombNum}
+          {/*  このコメントアウトを外すと開いていないマス目でも爆弾の配置などを確認できる。デバック用*/}
         </button>
       );
     }

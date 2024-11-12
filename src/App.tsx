@@ -22,9 +22,11 @@ export default function App() {
   for (let i = 0; i < rowSquareNum; i++) {
     zeroArr2Dim[i] = new Array(columnSquareNum);
     for (let j = 0; j < columnSquareNum; j++) {
-      // 各マスに isOpen: 開いたか、bombNum: 付近の爆弾の個数、isFlagged: チェックされているか の三つの情報を持たせる
-      // そのマスが爆弾であるとき、bombNumを-1とする
-      zeroArr2Dim[i][j] = [false, 0, false];
+      zeroArr2Dim[i][j] = {
+        isOpen: false,
+        bombNum: 0,
+        isFlagged: false,
+      };
     }
   }
 
@@ -63,15 +65,15 @@ export default function App() {
     }
 
     // 既に開かれたマスがクリックされた場合、何もしない
-    if (nowBoard[rowNum][columnNum][0]) {
+    if (nowBoard[rowNum][columnNum].isOpen) {
       return;
     }
 
     // クリックの直前に空いていたマス数を数える
     let openedSquaresNum: number = 0;
     nowBoard.forEach((rows) => {
-      rows.forEach(([isOpen, bombNum]) => {
-        if (isOpen) {
+      rows.forEach((square) => {
+        if (square.isOpen) {
           openedSquaresNum++;
         }
       });
@@ -83,40 +85,38 @@ export default function App() {
       // 初めに開いたマスが爆弾だけでなく、空白でないマスになった時も配置しなおす
       while (true) {
         nowBoard = [...placeBomb()];
-        if (nowBoard[rowNum][columnNum][1] === 0) {
+        if (nowBoard[rowNum][columnNum].bombNum === 0) {
           break;
         }
       }
     }
 
-    nowBoard[rowNum][columnNum][0] = true; // isOpen = true
+    nowBoard[rowNum][columnNum].isOpen = true;
 
     setBoard(nowBoard);
 
     // フラグが開かれた際、フラグ設置可能数を戻す
-    if (nowBoard[rowNum][columnNum][2]) {
-      // isFlagged === true
+    if (nowBoard[rowNum][columnNum].isFlagged) {
       setLeftFlagNum((n) => n + 1);
     }
 
     // ゲームオーバー
-    if (nowBoard[rowNum][columnNum][1] === -1) {
+    if (nowBoard[rowNum][columnNum].bombNum === -1) {
       setIsGameOver(true);
       return;
     }
 
     // ゲームクリア;
     if (openedSquaresNum + 1 === totalSquaresNum - totalBombNum) {
-      // 今開けた分の1マスをopenedSquareNumに加える
+      // 爆弾以外のすべてのマスを開けたとき、クリアとする
       setIsGameClear(true);
     }
 
     // 再帰的に空白のマスの周囲を開けていく
     const arroundCoordinates = getArroundCoodinates(rowNum, columnNum);
-    if (nowBoard[rowNum][columnNum][1] === 0) {
-      // bombNum === 0 の時
+    if (nowBoard[rowNum][columnNum].bombNum === 0) {
       arroundCoordinates.forEach(([row, column]) => {
-        if (board[row][column][0] === false) {
+        if (board[row][column].isOpen === false) {
           // すでに開けたマスでは実行しないようにする
           onClickSquare(row, column, nowBoard); // boardのstateが変更される前に再帰関数が実行されてしまうので、その時のboardを渡すようにする
         }
@@ -130,9 +130,17 @@ export default function App() {
     let board1Dim: Array<squareInfoType> = new Array(totalSquaresNum);
     for (let i = 0; i < totalSquaresNum; i++) {
       if (i < totalBombNum) {
-        board1Dim[i] = [false, -1, false];
+        board1Dim[i] = {
+          isOpen: false,
+          bombNum: -1,
+          isFlagged: false,
+        };
       } else {
-        board1Dim[i] = [false, 0, false];
+        board1Dim[i] = {
+          isOpen: false,
+          bombNum: 0,
+          isFlagged: false,
+        };
       }
     }
 
@@ -153,7 +161,7 @@ export default function App() {
     placedBombBoard.forEach((row, i) => {
       row.forEach((square, j) => {
         // 自身が爆弾であるときは数えない
-        if (square[1] === -1) {
+        if (square.bombNum === -1) {
           return;
         }
         // 盤上に収まる周辺のマスの座標を格納
@@ -163,11 +171,11 @@ export default function App() {
         // 周辺マスの各座標をチェックして爆弾の個数を数える
         let arroundBombNum: number = 0;
         arroundCoordinates.forEach((coordinates) => {
-          if (placedBombBoard[coordinates[0]][coordinates[1]][1] === -1) {
+          if (placedBombBoard[coordinates[0]][coordinates[1]].bombNum === -1) {
             arroundBombNum++;
           }
         });
-        square[1] = arroundBombNum;
+        square.bombNum = arroundBombNum;
       });
     });
 
@@ -190,8 +198,8 @@ export default function App() {
           columnNum + columnDirection >= 0 &&
           columnNum + columnDirection <= 8 && // 領域内かどうか
           (rowDirection !== 0 || columnDirection !== 0) && // 自マスでないかどうか
-          nowBoard[rowNum + rowDirection][columnNum + columnDirection][0] ===
-            false
+          nowBoard[rowNum + rowDirection][columnNum + columnDirection]
+            .isOpen === false
         ) {
           arroundCoordinates.push([
             rowNum + rowDirection,
@@ -210,9 +218,15 @@ export default function App() {
       return;
     }
     let nowBoard: Array<Array<squareInfoType>> = [...board];
-    nowBoard[rowNum][columnNum][2] = !nowBoard[rowNum][columnNum][2]; // そのマスのisFlaggedをトグル
+    // フラグを解除する際はフラグの数を1つ戻す(増やす)
+    if (nowBoard[rowNum][columnNum].isFlagged) {
+      setLeftFlagNum((n) => n + 1);
+    } else {
+      setLeftFlagNum((n) => n - 1);
+    }
+    nowBoard[rowNum][columnNum].isFlagged =
+      !nowBoard[rowNum][columnNum].isFlagged; // そのマスのisFlaggedをトグル
     setBoard(nowBoard);
-    setLeftFlagNum((n) => n - 1);
   };
 
   const restart = () => {
