@@ -110,6 +110,7 @@ export default function App() {
     if (openedSquaresNum + 1 === totalSquaresNum - totalBombNum) {
       // 爆弾以外のすべてのマスを開けたとき、クリアとする
       setIsGameClear(true);
+      return;
     }
 
     // 再帰的に空白のマスの周囲を開けていく
