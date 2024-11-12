@@ -1,16 +1,12 @@
 import { squareInfoType } from "../type/type";
 
-export const shuffleArray = (
-  array: Array<squareInfoType>
-): Array<squareInfoType> => {
-  const cloneArray = [...array];
-
-  for (let i = cloneArray.length - 1; i >= 0; i--) {
-    let rand = Math.floor(Math.random() * (i + 1));
-    let tmpStorage = cloneArray[i];
-    cloneArray[i] = cloneArray[rand];
-    cloneArray[rand] = tmpStorage;
+/**
+ * 受け取った配列をシャッフルする関数。(破壊的操作)
+ * @param array
+ */
+export const shuffleArray = (array: Array<squareInfoType>) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
-
-  return cloneArray;
 };

@@ -144,7 +144,7 @@ export default function App() {
       }
     }
 
-    let placedBombBoard1Dim: Array<squareInfoType> = shuffleArray(board1Dim);
+    shuffleArray(board1Dim);
 
     // 二次元配列に戻す
     const placedBombBoard: Array<Array<squareInfoType>> = new Array(
@@ -153,7 +153,7 @@ export default function App() {
     for (let i = 0; i < rowSquareNum; i++) {
       placedBombBoard[i] = new Array(columnSquareNum);
       for (let j = 0; j < columnSquareNum; j++) {
-        placedBombBoard[i][j] = placedBombBoard1Dim[rowSquareNum * i + j];
+        placedBombBoard[i][j] = board1Dim[rowSquareNum * i + j];
       }
     }
 
