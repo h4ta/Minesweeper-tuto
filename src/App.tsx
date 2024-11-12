@@ -218,6 +218,12 @@ export default function App() {
       return;
     }
     let nowBoard: Array<Array<squareInfoType>> = [...board];
+
+    // 既に開いているマスには置けないように
+    if (nowBoard[rowNum][columnNum].isOpen) {
+      return;
+    }
+
     // フラグを解除する際はフラグの数を1つ戻す(増やす)
     if (nowBoard[rowNum][columnNum].isFlagged) {
       setLeftFlagNum((n) => n + 1);
